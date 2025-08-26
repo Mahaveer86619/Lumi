@@ -1,0 +1,79 @@
+name: lumi
+description: "A Personal bot for various tasks."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management & Dependency Injection
+  get_it: ^7.7.0
+  flutter_bloc: ^8.1.6
+
+  # UI & Widgets
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.2.1
+  lottie: ^3.1.2
+  flutter_svg: ^2.0.10+1
+  cached_network_image: ^3.3.1
+  dotted_border: ^3.1.0
+  popover: ^0.3.1
+  smooth_page_indicator: ^1.1.0
+  flutter_animate: ^4.5.0
+  pinput: ^5.0.0
+  country_picker: ^2.0.26
+
+  # Data & Storage
+  http: ^1.2.1
+  sqflite: ^2.3.3+1
+  floor: any
+  path: ^1.9.0
+  path_provider: ^2.1.3
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.2.3
+  flutter_dotenv: ^5.1.0
+
+  # Utilities
+  uuid: ^4.5.1
+  equatable: ^2.0.5
+  intl: ^0.18.1
+  json_annotation: ^4.9.0
+  logger: ^2.6.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/app_logo.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/app_logo.png"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/app_logo.png
+  android: true
+  android_gravity: center
+  fullscreen: true
+  ios: true
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - .env
+
