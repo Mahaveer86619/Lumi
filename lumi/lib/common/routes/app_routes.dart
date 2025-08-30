@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:lumi/common/components/splash_screen.dart';
+import 'package:lumi/features/auth/presentation/screens/app_start.dart';
 import 'package:lumi/features/auth/presentation/screens/auth_screen.dart';
-import 'package:lumi/features/auth/presentation/screens/forgot_pass_screen.dart';
+import 'package:lumi/features/auth/presentation/screens/code_screen.dart';
+import 'package:lumi/features/auth/presentation/screens/email_screen.dart';
 
 final routes = <String, WidgetBuilder>{
-  '/': (context) => const SplashScreen(),
+  '/start': (context) => const AppStart(),
 
   // // auth
-  '/email_auth': (context) => const AuthScreen(),
-  '/forgot-password': (context) => const ForgotPassScreen(),
+  '/auth': (context) => const AuthScreen(),
+  '/email-auth': (context) => const EmailScreen(),
+  '/email-code': (context) => const CodeScreen(),
 
   // // Dashboard
   // '/dashboard': (context) => const DashboardScreen(),

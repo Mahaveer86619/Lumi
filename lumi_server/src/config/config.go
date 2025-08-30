@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/Mahaveer86619/Lumi/src/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -11,7 +12,6 @@ var (
 	GEMINI_API_KEY string
 	JWT_SECRET     string
 	PORT           string
-	DSN            string
 
 	DB_HOST     string
 	DB_PORT     string
@@ -35,15 +35,26 @@ func Load() error {
 }
 
 func updateGlobals() {
-	GEMINI_API_KEY = os.Getenv("GEMINI_API_KEY")
-	JWT_SECRET = os.Getenv("JWT_SECRET")
-	PORT = os.Getenv("PORT")
+	GEMINI_API_KEY = getEnv("GEMINI_API_KEY", "")
+	JWT_SECRET = getEnv("JWT_SECRET", "")
+	PORT = getEnv("PORT", "8080")
 
-	DB_HOST = os.Getenv("DB_HOST")
-	DB_PORT = os.Getenv("DB_PORT")
-	DB_USER = os.Getenv("DB_USER")
-	DB_PASSWORD = os.Getenv("DB_PASSWORD")
-	DB_NAME = os.Getenv("DB_NAME")
+	DB_HOST = getEnv("DB_HOST", "localhost")
+	DB_PORT = getEnv("DB_PORT", "5432")
+	DB_USER = getEnv("DB_USER", "root")
+	DB_PASSWORD = getEnv("DB_PASSWORD", "password")
+	DB_NAME = getEnv("DB_NAME", "lumi")
 
-	DB_DSN = DB_USER + ":" + DB_PASSWORD + "@tcp(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME + "?charset=utf8mb4&parseTime=True&loc=Local"
+	DB_DSN = "postgresql://" + DB_USER + ":" + DB_PASSWORD + "@" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?sslmode=disable"
+
+	utils.AppLogger.Info("Database connection string: %s", DB_DSN)
+}
+
+func getEnv(key string, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		log.Printf("Warning: Environment variable '%s' is not set", key)
+		return defaultValue
+	}
+	return value
 }

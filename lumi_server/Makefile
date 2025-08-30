@@ -1,6 +1,7 @@
-.PHONY: start-db stop-db
+.PHONY: start-db stop-db run migrate seed
 
-DB_CONTAINER_NAME = lumi
+DB_CONTAINER_NAME = lumi_db
+DB_NAME = lumi
 DB_USER = root
 DB_PASSWORD = password
 DB_PORT = 5432
@@ -13,6 +14,7 @@ start-db:
 	docker run --name $(DB_CONTAINER_NAME) \
 		-e POSTGRES_USER=$(DB_USER) \
 		-e POSTGRES_PASSWORD=$(DB_PASSWORD) \
+		-e POSTGRES_DB=$(DB_NAME) \
 		-p $(DB_PORT):5432 \
 		-v $(DB_VOLUME_NAME):/var/lib/postgresql/data \
 		-d $(DB_IMAGE)
@@ -24,3 +26,15 @@ stop-db:
 	docker stop $(DB_CONTAINER_NAME)
 	docker rm $(DB_CONTAINER_NAME)
 	@echo "PostgreSQL container '$(DB_CONTAINER_NAME)' stopped and removed."
+
+run:
+	@echo Running Go Server
+	go run cmd/main.go
+
+migrate:
+	@echo Running Migrations
+	go run cmd/migrate/main.go
+
+seed:
+	@echo Running Seed
+	go run cmd/seed/main.go

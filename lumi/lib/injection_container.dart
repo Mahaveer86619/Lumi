@@ -2,20 +2,21 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:lumi/common/components/bottom_app_bar/bloc/navigation_bloc.dart';
+import 'package:lumi/core/user/cubit/app_user_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
 
 Future<void> registerDependencies() async {
-  other();
-  core();
-  dataSources();
-  repositories();
-  useCases();
-  blocs();
+  await other();
+  await core();
+  await dataSources();
+  await repositories();
+  await useCases();
+  await blocs();
 }
 
-void other() async {
+Future<void> other() async {
   //* Register SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(sharedPreferences);
@@ -28,17 +29,26 @@ void other() async {
   sl.registerSingleton<Logger>(Logger());
 }
 
-void core() {
+Future<void> core() async {
+  //* Register AuthenticationBloc
+  sl.registerSingleton<AppUserCubit>(
+    AppUserCubit(
+      logger: sl<Logger>(),
+      secureStorage: sl<FlutterSecureStorage>(),
+      sharedPreferences: sl<SharedPreferences>(),
+    ),
+  );
+
   //* Register NavigationBloc
   sl.registerLazySingleton<NavigationBloc>(
     () => NavigationBloc(),
   );
 }
 
-void dataSources() {}
+Future<void> dataSources() async {}
 
-void repositories() {}
+Future<void> repositories() async {}
 
-void useCases() {}
+Future<void> useCases() async {}
 
-void blocs() {}
+Future<void> blocs() async {}

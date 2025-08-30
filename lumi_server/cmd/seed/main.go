@@ -5,7 +5,6 @@ import (
 
 	"github.com/Mahaveer86619/Lumi/src/config"
 	"github.com/Mahaveer86619/Lumi/src/database"
-	"github.com/Mahaveer86619/Lumi/src/web"
 )
 
 func main() {
@@ -19,7 +18,8 @@ func main() {
 		log.Fatal("Error connecting to database: ", err)
 	}
 
-	server := web.NewServer()
-	server.Init()
-	server.Start()
+	err = database.SeedDB()
+	if err != nil {
+		log.Fatal("Error seeding database: ", err)
+	}
 }

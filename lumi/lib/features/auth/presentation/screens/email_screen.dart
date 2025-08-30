@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:lumi/common/components/text_field.dart';
 import 'package:lumi/core/constants/app_strings.dart';
 import 'package:lumi/core/layout/responsive_layout.dart';
 import 'package:lumi/features/auth/presentation/widgets/auth_button.dart';
 
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+class EmailScreen extends StatefulWidget {
+  const EmailScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<EmailScreen> createState() => _EmailScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _EmailScreenState extends State<EmailScreen> {
+  final TextEditingController _emailController = TextEditingController();
+
   void _changeScreen(
     String routeName, {
     Map<String, dynamic>? arguments,
@@ -29,14 +32,9 @@ class _AuthScreenState extends State<AuthScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void handleGoogleAuth() {
-    // Handle Google authentication logic
-    _showMessage(AppStrings.googleAuthSuccessMessage);
-  }
-
-  void handleEmailAuth() {
+  void handleContinue() {
     // Handle email authentication logic
-    _changeScreen('/email-auth', isReplacement: false);
+    _changeScreen('/email-code', isReplacement: false);
   }
 
   @override
@@ -61,7 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Text(
-          'Authentication Screen',
+          'Email Screen',
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       ),
@@ -73,10 +71,10 @@ class _AuthScreenState extends State<AuthScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(),
+        const SizedBox(height: 24),
+        _buildEmailInput(),
         const Spacer(),
         _buildAuthButtons(),
-        const SizedBox(height: 24),
-        _buildTermsAndConditions(),
       ],
     );
   }
@@ -87,7 +85,7 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         const SizedBox(height: 40),
         Text(
-          AppStrings.welcomeHeader,
+          AppStrings.emailAuthHeader,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
@@ -95,7 +93,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          AppStrings.description,
+          AppStrings.emailAuthDescription,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withAlpha(225),
             fontWeight: FontWeight.normal,
@@ -105,28 +103,25 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _buildAuthButtons() {
-    return Column(
-      children: [
-        AuthButton(onPressed: handleGoogleAuth, isGoogleAuth: true),
-        const SizedBox(height: 16),
-        AuthButton(
-          onPressed: handleEmailAuth,
-          isGoogleAuth: false,
-          label: AppStrings.emailAuthButton,
-        ),
-      ],
+  Widget _buildEmailInput() {
+    return MyFormTextField(
+      hintText: 'example@email.com',
+      controller: _emailController,
+      keyboardType: TextInputType.emailAddress,
+      label: 'Email',
+      keyboardAction: TextInputAction.done,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your email';
+        }
+        return null;
+      },
     );
   }
 
-  Widget _buildTermsAndConditions() {
-    return Text(
-      AppStrings.termsAndConditions,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 128),
-        fontWeight: FontWeight.normal,
-      ),
-      textAlign: TextAlign.center,
+  Widget _buildAuthButtons() {
+    return Column(
+      children: [AuthButton(onPressed: handleContinue, isGoogleAuth: false)],
     );
   }
 }

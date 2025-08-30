@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/Mahaveer86619/Lumi/src/utils"
 )
 
 // LoggingMiddleware logs incoming HTTP requests with structured data.
@@ -19,12 +19,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(wrappedWriter, r)
 
 		// Log the request details
-		logrus.WithFields(logrus.Fields{
-			"method":      r.Method,
-			"path":        r.URL.Path,
-			"status_code": wrappedWriter.statusCode,
-			"duration":    time.Since(start).String(),
-		}).Info("API Request")
+		utils.AppLogger.Info("%s %s %d %s", r.Method, r.URL.Path, wrappedWriter.statusCode, time.Since(start).String())
 	})
 }
 

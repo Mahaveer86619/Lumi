@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lumi/common/components/bottom_app_bar/bloc/navigation_bloc.dart';
 import 'package:lumi/common/routes/app_routes.dart';
 import 'package:lumi/core/theme/theme.dart';
+import 'package:lumi/core/user/cubit/app_user_cubit.dart';
 import 'package:lumi/injection_container.dart' as di;
 
 void main() async {
@@ -25,6 +26,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<AppUserCubit>(
+          create: (context) => di.sl<AppUserCubit>(),
+        ),
         BlocProvider<NavigationBloc>(
           create: (context) => di.sl<NavigationBloc>(),
         ),
@@ -33,7 +37,7 @@ class MyApp extends StatelessWidget {
         title: 'DiaryMate',
         theme: darkMode,
         debugShowCheckedModeBanner: false,
-        initialRoute: '/email_auth',
+        initialRoute: '/start',
         routes: routes,
       ),
     );

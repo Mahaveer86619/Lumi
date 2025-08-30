@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:lumi/common/components/text_field.dart';
 import 'package:lumi/core/constants/app_strings.dart';
 import 'package:lumi/core/layout/responsive_layout.dart';
 import 'package:lumi/features/auth/presentation/widgets/auth_button.dart';
 
-class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+class CodeScreen extends StatefulWidget {
+  const CodeScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  State<CodeScreen> createState() => _CodeScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _CodeScreenState extends State<CodeScreen> {
+  final TextEditingController _codeController = TextEditingController();
+
+  int _enterManually = 0;
+
   void _changeScreen(
     String routeName, {
     Map<String, dynamic>? arguments,
@@ -29,14 +34,19 @@ class _AuthScreenState extends State<AuthScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void handleGoogleAuth() {
-    // Handle Google authentication logic
-    _showMessage(AppStrings.googleAuthSuccessMessage);
+  void handleContinue() {
+    // Handle email authentication logic
+    _showMessage('Email code sent');
   }
 
-  void handleEmailAuth() {
-    // Handle email authentication logic
-    _changeScreen('/email-auth', isReplacement: false);
+  void _toggleEnterManually() {
+    setState(() {
+      if (_enterManually == 2) {
+        _enterManually = 0;
+      } else {
+        _enterManually++;
+      }
+    });
   }
 
   @override
@@ -61,7 +71,7 @@ class _AuthScreenState extends State<AuthScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Text(
-          'Authentication Screen',
+          'Email Screen',
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       ),
@@ -73,10 +83,10 @@ class _AuthScreenState extends State<AuthScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(),
+        const SizedBox(height: 24),
+        if (_enterManually == 1) _buildManualBody(),
         const Spacer(),
         _buildAuthButtons(),
-        const SizedBox(height: 24),
-        _buildTermsAndConditions(),
       ],
     );
   }
@@ -87,7 +97,7 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         const SizedBox(height: 40),
         Text(
-          AppStrings.welcomeHeader,
+          AppStrings.codeEnterHeader,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
@@ -95,7 +105,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          AppStrings.description,
+          AppStrings.codeEnterDescription,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withAlpha(225),
             fontWeight: FontWeight.normal,
@@ -105,28 +115,37 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _buildAuthButtons() {
+  Widget _buildManualBody() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        AuthButton(onPressed: handleGoogleAuth, isGoogleAuth: true),
-        const SizedBox(height: 16),
-        AuthButton(
-          onPressed: handleEmailAuth,
-          isGoogleAuth: false,
-          label: AppStrings.emailAuthButton,
+        MyFormTextField(
+          hintText: '',
+          controller: _codeController,
+          keyboardType: TextInputType.number,
+          label: 'Verification Code',
+          keyboardAction: TextInputAction.done,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter the code';
+            }
+            return null;
+          },
         ),
       ],
     );
   }
 
-  Widget _buildTermsAndConditions() {
-    return Text(
-      AppStrings.termsAndConditions,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 128),
-        fontWeight: FontWeight.normal,
-      ),
-      textAlign: TextAlign.center,
+  Widget _buildAuthButtons() {
+    return AuthButton(
+      onPressed: _toggleEnterManually,
+      isGoogleAuth: false,
+      label: (_enterManually == 0)
+          ? AppStrings.enterCodeManually
+          : (_enterManually == 1)
+          ? AppStrings.codeVerifyButton
+          : 'Continue',
     );
   }
 }

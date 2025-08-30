@@ -46,6 +46,8 @@ dependencies:
   flutter_native_splash: ^2.4.6
   flutter_launcher_icons: ^0.14.4
 
+  awesome_notifications: ^0.10.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
