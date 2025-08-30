@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         title: 'DiaryMate',
         theme: darkMode,
         debugShowCheckedModeBanner: false,
-        initialRoute: '/register',
+        initialRoute: '/email_auth',
         routes: routes,
       ),
     );
