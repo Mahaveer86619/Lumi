@@ -5,29 +5,36 @@ import (
 
 	"github.com/Mahaveer86619/Lumi/src/handlers"
 	"github.com/Mahaveer86619/Lumi/src/middleware"
+	"github.com/Mahaveer86619/Lumi/src/types"
+	"github.com/gorilla/mux"
 )
 
 // SetupRoutes sets up the routes for the application.
-func SetupRoutes() *http.ServeMux {
-	mux := http.NewServeMux()
-	protectedMux := http.NewServeMux()
+func SetupRoutes() *mux.Router {
+	router := mux.NewRouter()
 
-	mux.HandleFunc("/health", handlers.HealthHandler)
+	// Public routes
+	router.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
+	router.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
+	router.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
+	router.HandleFunc("/refresh", handlers.RefreshTokenHandler).Methods("POST")
 
-	mux.HandleFunc("POST /register", handlers.RegisterHandler)
-	mux.HandleFunc("POST /login", handlers.LoginHandler)
-	mux.HandleFunc("POST /refresh", handlers.RefreshTokenHandler)
+	// Protected routes
+	api := router.PathPrefix("/api").Subrouter()
+	api.Use(middleware.AuthMiddleware)
 
-	protectedMux.HandleFunc("GET /users", handlers.GetAllUsersHandler)
-	protectedMux.HandleFunc("GET /users/{id}", handlers.GetUserByIDHandler)
-	protectedMux.HandleFunc("GET /users/email/{email}", handlers.GetUserByEmailHandler)
-	protectedMux.HandleFunc("PUT /users/{id}", handlers.UpdateUserHandler)
-	protectedMux.HandleFunc("DELETE /users/{id}", handlers.DeleteUserHandler)
+	api.HandleFunc("/users/all", handlers.GetAllUsersHandler).Methods("GET")
+	api.HandleFunc("/users", handlers.GetUserByIDHandler).Methods("GET")
+	api.HandleFunc("/users/email", handlers.GetUserByEmailHandler).Methods("GET")
+	api.HandleFunc("/users", handlers.UpdateUserHandler).Methods("PUT")
+	api.HandleFunc("/users", handlers.DeleteUserHandler).Methods("DELETE")
 
-	// Add authentication middleware to protected routes
-	protectedHandler := middleware.AuthMiddleware(protectedMux)
+	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		failure := types.Failure{}
+		failure.SetStatusCode(http.StatusNotFound)
+		failure.SetMessage("API endpoint not found")
+		failure.JSON(w)
+	})
 
-	mux.Handle("/api", protectedHandler)
-
-	return mux
+	return router
 }

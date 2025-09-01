@@ -10,7 +10,7 @@ DB_IMAGE = postgres:latest
 
 start-db:
 	@echo "Starting PostgreSQL database container..."
-	docker volume create $(DB_VOLUME_NAME) || true # Create volume if it doesn't exist
+	docker volume create $(DB_VOLUME_NAME) || true
 	docker run --name $(DB_CONTAINER_NAME) \
 		-e POSTGRES_USER=$(DB_USER) \
 		-e POSTGRES_PASSWORD=$(DB_PASSWORD) \

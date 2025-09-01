@@ -12,3 +12,7 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type EmailRequest struct {
+	Email  string `json:"email"`
+}

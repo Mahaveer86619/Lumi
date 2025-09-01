@@ -3,9 +3,11 @@ import 'package:lumi/features/auth/presentation/screens/app_start.dart';
 import 'package:lumi/features/auth/presentation/screens/auth_screen.dart';
 import 'package:lumi/features/auth/presentation/screens/code_screen.dart';
 import 'package:lumi/features/auth/presentation/screens/email_screen.dart';
+import 'package:lumi/features/auth/presentation/screens/test_screen.dart';
 
 final routes = <String, WidgetBuilder>{
   '/start': (context) => const AppStart(),
+  '/test': (context) => const TestScreen(),
 
   // // auth
   '/auth': (context) => const AuthScreen(),

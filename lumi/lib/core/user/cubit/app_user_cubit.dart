@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:lumi/core/constants/app_constants.dart';
+import 'package:lumi/core/user/data/auth_data.dart';
 import 'package:lumi/core/user/models/app_user.dart';
+import 'package:lumi/core/utils/data_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_user_state.dart';
@@ -14,24 +16,27 @@ class AppUserCubit extends Cubit<AppUserState> {
   final Logger _logger;
   final FlutterSecureStorage _secureStorage;
   final SharedPreferences _sharedPreferences;
-  
+  final AuthData _authData;
+
   AppUserCubit({
     required Logger logger,
     required FlutterSecureStorage secureStorage,
     required SharedPreferences sharedPreferences,
-  })  : _logger = logger,
-        _secureStorage = secureStorage,
-        _sharedPreferences = sharedPreferences,
-        super(const AppUserInitial());
+    required AuthData authData,
+  }) : _logger = logger,
+       _secureStorage = secureStorage,
+       _sharedPreferences = sharedPreferences,
+       _authData = authData,
+       super(const AppUserInitial());
 
   /// Authenticates user and saves their data securely
   Future<void> authenticateUser(AppUser user) async {
     try {
       emit(const AppUserLoading());
-      
+
       final userMap = user.toJson();
       await _saveUser(userMap);
-      
+
       _logger.i('User authenticated successfully: ${user.id}');
       emit(AppUserAuthenticated(user));
     } catch (e, stackTrace) {
@@ -44,11 +49,11 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> loadUser() async {
     try {
       emit(const AppUserLoading());
-      
+
       final userMap = await _getUser();
       if (userMap != null) {
         final user = AppUser.fromJson(userMap);
-        
+
         // Verify token validity
         final token = await getToken();
         if (token != null && await _isTokenValid(token)) {
@@ -76,9 +81,9 @@ class AppUserCubit extends Cubit<AppUserState> {
       safeuserMap.remove('password');
       safeuserMap.remove('token');
       safeuserMap.remove('refreshToken');
-      
+
       await _sharedPreferences.setString(
-        AppConstants.prefUserKey, 
+        AppConstants.prefUserKey,
         jsonEncode(safeuserMap),
       );
       _logger.d('User data saved to SharedPreferences');
@@ -106,13 +111,13 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> signOut() async {
     try {
       emit(const AppUserLoading());
-      
+
       // Clear all user-related data
       await Future.wait([
         _sharedPreferences.remove(AppConstants.prefUserKey),
         _removeTokens(),
       ]);
-      
+
       _logger.i('User signed out successfully');
       emit(const AppUserInitial());
     } catch (e, stackTrace) {
@@ -123,23 +128,23 @@ class AppUserCubit extends Cubit<AppUserState> {
 
   /// Saves authentication tokens securely
   Future<void> saveTokens({
-    required String accessToken, 
+    required String accessToken,
     required String refreshToken,
   }) async {
     try {
       await Future.wait([
         _secureStorage.write(
-          key: AppConstants.secureTokenKey, 
+          key: AppConstants.secureTokenKey,
           value: accessToken,
         ),
         _secureStorage.write(
-          key: AppConstants.secureRefreshTokenKey, 
+          key: AppConstants.secureRefreshTokenKey,
           value: refreshToken,
         ),
       ]);
-      
+
       _logger.d('Tokens saved securely');
-      
+
       // Update state with current user if available
       if (state is AppUserAuthenticated) {
         final currentUser = (state as AppUserAuthenticated).user;
@@ -173,18 +178,48 @@ class AppUserCubit extends Cubit<AppUserState> {
 
   /// Updates both access and refresh tokens
   Future<void> updateTokens({
-    required String accessToken, 
+    required String accessToken,
     required String refreshToken,
   }) async {
     try {
-      await saveTokens(
-        accessToken: accessToken, 
-        refreshToken: refreshToken,
-      );
+      await saveTokens(accessToken: accessToken, refreshToken: refreshToken);
       _logger.i('Tokens updated successfully');
     } catch (e, stackTrace) {
       _logger.e('Error updating tokens', error: e, stackTrace: stackTrace);
       throw Exception('Failed to update authentication tokens');
+    }
+  }
+
+  Future<void> refreshTokens() async {
+    try {
+      final refreshToken = await getRefreshToken();
+      if (refreshToken == null) {
+        _logger.w('No refresh token available');
+        await signOut();
+        return;
+      }
+
+      final resp = await _authData.refreshTokens(refreshToken);
+
+      if (resp is DataFailure) {
+        _logger.w('Failed to refresh tokens: ${resp.message}');
+        await signOut();
+        return;
+      } else {
+        final newTokens = resp.data;
+        if (newTokens == null) {
+          _logger.w('No new tokens received');
+          await signOut();
+          return;
+        }
+        await updateTokens(
+          accessToken: newTokens['token'],
+          refreshToken: newTokens['refresh_token'],
+        );
+      }
+    } catch (e, stackTrace) {
+      _logger.e('Error during token refresh', error: e, stackTrace: stackTrace);
+      await signOut();
     }
   }
 
@@ -206,8 +241,8 @@ class AppUserCubit extends Cubit<AppUserState> {
   bool get isAuthenticated => state is AppUserAuthenticated;
 
   /// Gets the current authenticated user
-  AppUser? get currentUser => state is AppUserAuthenticated 
-      ? (state as AppUserAuthenticated).user 
+  AppUser? get currentUser => state is AppUserAuthenticated
+      ? (state as AppUserAuthenticated).user
       : null;
 
   /// Checks if token exists and is potentially valid
@@ -226,27 +261,27 @@ class AppUserCubit extends Cubit<AppUserState> {
     try {
       // Basic checks
       if (token.isEmpty) return false;
-      
+
       // For JWT tokens, you might want to check expiration
       // This is a simplified example - implement proper JWT validation
       final parts = token.split('.');
       if (parts.length != 3) return false;
-      
+
       // Decode payload and check expiration
       final payload = parts[1];
       final normalized = base64Url.normalize(payload);
       final decoded = utf8.decode(base64Url.decode(normalized));
       final payloadMap = jsonDecode(decoded) as Map<String, dynamic>;
-      
+
       final exp = payloadMap['exp'] as int?;
       if (exp != null) {
         final expirationDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
         final now = DateTime.now();
-        
+
         // Add 5-minute buffer for token refresh
         return expirationDate.isAfter(now.add(const Duration(minutes: 5)));
       }
-      
+
       return true; // If no expiration found, assume valid
     } catch (e) {
       _logger.e('Error validating token: $e');
@@ -258,12 +293,12 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> clearAllData() async {
     try {
       emit(const AppUserLoading());
-      
+
       await Future.wait([
         _sharedPreferences.clear(),
         _secureStorage.deleteAll(),
       ]);
-      
+
       _logger.i('All user data cleared');
       emit(const AppUserInitial());
     } catch (e, stackTrace) {
@@ -276,14 +311,18 @@ class AppUserCubit extends Cubit<AppUserState> {
   Future<void> updateUserProfile(AppUser updatedUser) async {
     try {
       emit(const AppUserLoading());
-      
+
       final userMap = updatedUser.toJson();
       await _saveUser(userMap);
-      
+
       _logger.i('User profile updated: ${updatedUser.id}');
       emit(AppUserAuthenticated(updatedUser));
     } catch (e, stackTrace) {
-      _logger.e('Error updating user profile', error: e, stackTrace: stackTrace);
+      _logger.e(
+        'Error updating user profile',
+        error: e,
+        stackTrace: stackTrace,
+      );
       emit(AppUserError('Failed to update profile: ${e.toString()}'));
     }
   }

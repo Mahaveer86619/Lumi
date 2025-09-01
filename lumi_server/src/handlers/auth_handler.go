@@ -84,5 +84,32 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	success := types.Success{}
 	success.SetStatusCode(status)
 	success.SetData(user)
+	success.SetMessage("Token refreshed successfully")
+	success.JSON(w)
+}
+
+func SendVerificationEmailHandler(w http.ResponseWriter, r *http.Request) {
+	var req types.EmailRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		failure := types.Failure{}
+		failure.SetStatusCode(http.StatusBadRequest)
+		failure.SetMessage(err.Error())
+		failure.JSON(w)
+		return
+	}
+
+	// Handle email sending
+	status, err := services.SendVerificationEmail(req)
+	if err != nil {
+		failure := types.Failure{}
+		failure.SetStatusCode(status)
+		failure.SetMessage(err.Error())
+		failure.JSON(w)
+		return
+	}
+
+	success := types.Success{}
+	success.SetStatusCode(status)
+	success.SetMessage("Email sent successfully")
 	success.JSON(w)
 }

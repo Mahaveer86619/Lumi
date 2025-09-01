@@ -19,6 +19,13 @@ var (
 	DB_PASSWORD string
 	DB_NAME     string
 	DB_DSN      string
+
+	GMAIL          string
+	GMAIL_APP_PASS string
+	SMTP_HOST      string
+	SMTP_PORT      string
+
+	FP_SECRET string
 )
 
 func Load() error {
@@ -46,6 +53,13 @@ func updateGlobals() {
 	DB_NAME = getEnv("DB_NAME", "lumi")
 
 	DB_DSN = "postgresql://" + DB_USER + ":" + DB_PASSWORD + "@" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?sslmode=disable"
+
+	GMAIL = getEnv("GMAIL", "")
+	GMAIL_APP_PASS = getEnv("GMAIL_APP_PASS", "")
+	SMTP_HOST = getEnv("SMTP_HOST", "")
+	SMTP_PORT = getEnv("SMTP_PORT", "")
+
+	FP_SECRET = getEnv("FP_SECRET", "")
 
 	utils.AppLogger.Info("Database connection string: %s", DB_DSN)
 }

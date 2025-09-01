@@ -1,10 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import 'package:lumi/common/components/bottom_app_bar/bloc/navigation_bloc.dart';
 import 'package:lumi/common/routes/app_routes.dart';
 import 'package:lumi/core/theme/theme.dart';
 import 'package:lumi/core/user/cubit/app_user_cubit.dart';
+import 'package:lumi/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:lumi/injection_container.dart' as di;
 
 void main() async {
@@ -26,18 +30,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AppUserCubit>(
-          create: (context) => di.sl<AppUserCubit>(),
-        ),
+        BlocProvider<AppUserCubit>(create: (context) => di.sl<AppUserCubit>()),
         BlocProvider<NavigationBloc>(
           create: (context) => di.sl<NavigationBloc>(),
         ),
+        BlocProvider<AuthBloc>(create: (context) => di.sl<AuthBloc>()),
       ],
       child: MaterialApp(
         title: 'DiaryMate',
         theme: darkMode,
         debugShowCheckedModeBanner: false,
-        initialRoute: '/start',
+        initialRoute: '/test',
         routes: routes,
       ),
     );

@@ -23,17 +23,10 @@ type Claims struct {
 
 var JwtKey []byte
 
-// Initialize JwtKey with validation
-func init() {
-	if config.JWT_SECRET == "" {
-		utils.AppLogger.Error("JWT_SECRET is not set in configuration")
-	} else {
-		JwtKey = []byte(config.JWT_SECRET)
-		utils.AppLogger.Info("JWT_SECRET initialized successfully")
-	}
-}
-
 func AuthMiddleware(next http.Handler) http.Handler {
+	if len(JwtKey) == 0 {
+		JwtKey = []byte(config.JWT_SECRET)
+	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -73,13 +66,16 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		utils.AppLogger.Info("Successfully authenticated token: %+v", claims)
 		ctx := context.WithValue(r.Context(), userContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 func UserFromContext(ctx context.Context) (*Claims, bool) {
+	if len(JwtKey) == 0 {
+		JwtKey = []byte(config.JWT_SECRET)
+	}
+
 	claims, ok := ctx.Value(userContextKey).(*Claims)
 	if !ok {
 		utils.AppLogger.Error("Failed to retrieve claims from context")
@@ -91,8 +87,7 @@ func UserFromContext(ctx context.Context) (*Claims, bool) {
 
 func RefreshToken(tokenString string) (types.Tokens, error) {
 	if len(JwtKey) == 0 {
-		utils.AppLogger.Error("Cannot process refresh token: JWT_SECRET is not configured")
-		return types.Tokens{}, errors.New("JWT secret key is not configured")
+		JwtKey = []byte(config.JWT_SECRET)
 	}
 
 	claims := &Claims{}
@@ -105,7 +100,6 @@ func RefreshToken(tokenString string) (types.Tokens, error) {
 			utils.AppLogger.Error("JWT secret key is empty")
 			return nil, errors.New("invalid JWT secret key")
 		}
-		utils.AppLogger.Info("Validating refresh token with claims: %+v", claims)
 		return JwtKey, nil
 	})
 	if err != nil {
@@ -117,14 +111,12 @@ func RefreshToken(tokenString string) (types.Tokens, error) {
 		return types.Tokens{}, jwt.ErrSignatureInvalid
 	}
 
-	utils.AppLogger.Info("Successfully validated refresh token: %+v", claims)
 	newToken, newRefreshToken, err := GenerateTokens()
 	if err != nil {
 		utils.AppLogger.Error("Failed to generate new tokens: %v", err)
 		return types.Tokens{}, err
 	}
 
-	utils.AppLogger.Info("Generated new tokens successfully")
 	return types.Tokens{
 		Token:        newToken,
 		RefreshToken: newRefreshToken,
@@ -132,6 +124,9 @@ func RefreshToken(tokenString string) (types.Tokens, error) {
 }
 
 func GenerateTokens() (string, string, error) {
+	if len(JwtKey) == 0 {
+		JwtKey = []byte(config.JWT_SECRET)
+	}
 	token, err := GenerateToken()
 	if err != nil {
 		utils.AppLogger.Error("Failed to generate access token: %v", err)
@@ -149,6 +144,9 @@ func GenerateTokens() (string, string, error) {
 }
 
 func GenerateToken() (string, error) {
+	if len(JwtKey) == 0 {
+		JwtKey = []byte(config.JWT_SECRET)
+	}
 	if len(config.JWT_SECRET) == 0 {
 		utils.AppLogger.Error("JWT_SECRET is empty")
 		return "", errors.New("JWT secret key is not configured")
@@ -170,9 +168,8 @@ func GenerateToken() (string, error) {
 }
 
 func GenerateRefreshToken() (string, error) {
-	if len(config.JWT_SECRET) == 0 {
-		utils.AppLogger.Error("JWT_SECRET is empty")
-		return "", errors.New("JWT secret key is not configured")
+	if len(JwtKey) == 0 {
+		JwtKey = []byte(config.JWT_SECRET)
 	}
 
 	expirationTime := time.Now().Add(721 * time.Hour)

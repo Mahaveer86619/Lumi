@@ -1,11 +1,11 @@
-class AppUser {
+class UserEntity {
   final String id;
   final String fullName;
   final String email;
   final String profilePicture;
   final String authType;
 
-  AppUser({
+  UserEntity({
     required this.id,
     required this.fullName,
     required this.email,
@@ -13,9 +13,8 @@ class AppUser {
     required this.authType,
   });
 
-  // to json
-  factory AppUser.fromJson(Map<String, dynamic> json) {
-    return AppUser(
+  factory UserEntity.fromJson(Map<String, dynamic> json) {
+    return UserEntity(
       id: json['id'],
       fullName: json['fullName'],
       email: json['email'],
@@ -24,7 +23,6 @@ class AppUser {
     );
   }
 
-  // from json
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -38,7 +36,7 @@ class AppUser {
   @override
   String toString() {
     return """
-AppUser{
+UserEntity{
   id: $id, 
   fullName: $fullName, 
   email: $email, 

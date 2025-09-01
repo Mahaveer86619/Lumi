@@ -16,6 +16,6 @@ class AppConstants {
   static String notificationChannelName = 'lumi Notifications';
   static String notificationChannelDescription = 'Notifications for lumi';
 
-  static String defaultAvatarUrl = 'https://feji.us/a593ri';
-  static String defaultGroupAvatarUrl = 'https://tinyurl.com/223bcs7k';
+  static String defaultAvatarUrl = 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80';
+  
 }

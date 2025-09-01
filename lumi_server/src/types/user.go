@@ -16,6 +16,18 @@ type UserResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type UserSafeResponse struct {
+	ID           string `json:"id"`
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+}
+
+type UpdateUserRequest struct {
+	ID           string `json:"id"`
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+}
+
 type TokenRefreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
