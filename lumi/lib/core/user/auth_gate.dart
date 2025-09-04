@@ -6,33 +6,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lumi/core/notifications/app_notifications.dart';
 import 'package:lumi/core/user/cubit/app_user_cubit.dart';
 import 'package:lumi/features/auth/presentation/screens/auth_screen.dart';
+import 'package:lumi/features/dashboard/presentation/screens/home_screen.dart';
 
-class AppStart extends StatefulWidget {
-  const AppStart({super.key});
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
 
   @override
-  State<AppStart> createState() => _AppStartState();
+  State<AuthGate> createState() => _AuthGateState();
 }
 
-class _AppStartState extends State<AppStart> {
-  void _changeScreen(
-    String routeName, {
-    Map<String, dynamic>? arguments,
-    bool isReplacement = false,
-  }) {
-    if (isReplacement) {
-      Navigator.pushReplacementNamed(context, routeName, arguments: arguments);
-    } else {
-      Navigator.pushNamed(context, routeName, arguments: arguments);
-    }
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
+class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
@@ -66,7 +49,7 @@ class _AppStartState extends State<AppStart> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is AppUserAuthenticated) {
           log("User is authenticated");
-          return const Placeholder();
+          return const HomeScreen();
         }
 
         log("User is not authenticated");

@@ -2,6 +2,7 @@ class UserEntity {
   final String id;
   final String fullName;
   final String email;
+  final String isVerified;
   final String profilePicture;
   final String authType;
 
@@ -9,6 +10,7 @@ class UserEntity {
     required this.id,
     required this.fullName,
     required this.email,
+    required this.isVerified,
     required this.profilePicture,
     required this.authType,
   });
@@ -18,6 +20,7 @@ class UserEntity {
       id: json['id'],
       fullName: json['fullName'],
       email: json['email'],
+      isVerified: json['isVerified'] ?? '',
       profilePicture: json['profilePicture'] ?? '',
       authType: json['authType'] ?? '',
     );
@@ -28,6 +31,7 @@ class UserEntity {
       'id': id,
       'fullName': fullName,
       'email': email,
+      'isVerified': isVerified,
       'profilePicture': profilePicture,
       'authType': authType,
     };

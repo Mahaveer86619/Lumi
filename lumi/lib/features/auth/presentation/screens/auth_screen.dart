@@ -36,7 +36,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void handleEmailAuth() {
     // Handle email authentication logic
-    _changeScreen('/email-auth', isReplacement: false);
+    _changeScreen('/sign-in', isReplacement: false);
   }
 
   @override

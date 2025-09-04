@@ -5,6 +5,7 @@ import 'package:lumi/core/user/models/app_user.dart';
 import 'package:lumi/core/utils/data_state.dart';
 import 'package:lumi/features/auth/data/models/user_model.dart';
 import 'package:lumi/features/auth/data/sources/auth_source.dart';
+import 'package:lumi/features/auth/domain/entity/user_entity.dart';
 import 'package:lumi/features/auth/domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -16,9 +17,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required Logger logger,
     required AuthSource authSource,
     required AppUserCubit appUserCubit,
-  })  : _logger = logger,
-        _authSource = authSource,
-        _appUserCubit = appUserCubit;
+  }) : _logger = logger,
+       _authSource = authSource,
+       _appUserCubit = appUserCubit;
 
   @override
   Future<DataState<UserModel>> authenticateWithEmail(
@@ -29,11 +30,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final resp = await _authSource.authenticateWithEmail(email, password);
 
       if (resp is DataFailure) {
+        _logger.i("Failure ${resp.message!}");
         return DataFailure(resp.message!, resp.statusCode!);
       }
 
-      final userModel = UserModel.fromJson(resp.data!);
-
+      final userModel = UserModel.fromJson(resp.data!['data']);
 
       final user = userModel.toEntity();
       _appUserCubit.authenticateUser(
@@ -41,7 +42,10 @@ class AuthRepositoryImpl implements AuthRepository {
           id: user.id,
           fullName: user.fullName,
           email: user.email,
-          profilePicture: (user.profilePicture == "") ? AppConstants.defaultAvatarUrl : user.profilePicture,
+          isVerified: user.isVerified,
+          profilePicture: (user.profilePicture == "")
+              ? AppConstants.defaultAvatarUrl
+              : user.profilePicture,
           authType: (user.authType == "") ? "" : user.authType,
         ),
       );
@@ -52,6 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return DataSuccess(userModel, resp.message!);
     } catch (e) {
+      _logger.e("Error: $e");
       return DataFailure("Authentication failed", 500);
     }
   }
@@ -81,20 +86,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<DataState<UserModel>> getCurrentUser() {
-    // TODO: implement getCurrentUser
+  Future<DataState<UserEntity>> sendCodeForVerification(
+    String email,
+    String code,
+  ) {
+    // TODO: implement sendCodeForVerification
     throw UnimplementedError();
   }
 
   @override
-  Future<void> logout() {
-    // TODO: implement logout
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<DataState<UserModel>> refreshToken(String refreshToken) {
-    // TODO: implement refreshToken
+  Future<DataState<void>> sendEmailForVerification(String email) {
+    // TODO: implement sendEmailForVerification
     throw UnimplementedError();
   }
 }

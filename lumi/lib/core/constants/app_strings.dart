@@ -8,13 +8,15 @@ class AppStrings {
   static const String codeVerifyButton = "Verify Code";
   static const String termsAndConditions =
       "By continuing, you agree to our Terms of Service and Privacy Policy.";
+  static const String dontHaveAnAccount = "Don't have an account? ";
+  static const String alreadyHaveAnAccount = "Already have an account? ";
   static const String googleAuthSuccessMessage =
       "Google authentication successful!";
   static const String emailAuthSuccessMessage =
       "Email authentication successful!";
   static const String emailAuthHeader = "Continue with Email";
   static const String emailAuthDescription =
-      "Enter your email to get a login link.";
+      "Enter your credentials to get a verification code and login link.";
   static const String emailSentHeader = "Click the login link.";
   static const String emailSentDescription =
       "An email link has been sent to your inbox. If you don't see the email, check your spam folder.";

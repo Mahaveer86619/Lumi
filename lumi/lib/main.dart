@@ -1,9 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:lumi/common/components/bottom_app_bar/bloc/navigation_bloc.dart';
 import 'package:lumi/common/routes/app_routes.dart';
 import 'package:lumi/core/theme/theme.dart';
@@ -37,10 +34,10 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthBloc>(create: (context) => di.sl<AuthBloc>()),
       ],
       child: MaterialApp(
-        title: 'DiaryMate',
+        title: 'lumi',
         theme: darkMode,
         debugShowCheckedModeBanner: false,
-        initialRoute: '/test',
+        initialRoute: '/auth-gate',
         routes: routes,
       ),
     );

@@ -11,7 +11,7 @@ class SendEmailUsecase
 
   @override
   Future<DataState<void>> execute({required SendEmailUsecaseParams params}) {
-    return _authRepository.sendEmail(params.email);
+    return _authRepository.sendEmailForVerification(params.email);
   }
 }
 

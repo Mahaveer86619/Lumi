@@ -5,6 +5,8 @@ class ApiEndpoints {
 
   static String login = '$baseUrl/login';
   static String register = '$baseUrl/register';
+  static String sendEmail = '$baseUrl/verify-email';
+  static String verifyOTP = '$baseUrl/verify-otp';
 
   static String refreshToken = '$baseUrl/refresh';
 

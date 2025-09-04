@@ -9,6 +9,8 @@ import 'package:lumi/features/auth/data/sources/auth_source.dart';
 import 'package:lumi/features/auth/domain/repository/auth_repository.dart';
 import 'package:lumi/features/auth/domain/usecases/authenticate_usecase.dart';
 import 'package:lumi/features/auth/domain/usecases/register_usecase.dart';
+import 'package:lumi/features/auth/domain/usecases/send_email_usecase.dart';
+import 'package:lumi/features/auth/domain/usecases/send_otp_usecase.dart';
 import 'package:lumi/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,11 +40,7 @@ Future<void> other() async {
 
 Future<void> core() async {
   //* Auth Data
-  sl.registerLazySingleton(
-    () => AuthData(
-      logger: sl<Logger>(),
-    ),
-  );
+  sl.registerLazySingleton(() => AuthData(logger: sl<Logger>()));
 
   //* Register AuthenticationBloc
   sl.registerSingleton<AppUserCubit>(
@@ -55,17 +53,11 @@ Future<void> core() async {
   );
 
   //* Register NavigationBloc
-  sl.registerLazySingleton<NavigationBloc>(
-    () => NavigationBloc(),
-  );
+  sl.registerLazySingleton<NavigationBloc>(() => NavigationBloc());
 }
 
 Future<void> dataSources() async {
-  sl.registerLazySingleton<AuthSource>(
-    () => AuthSource(
-      logger: sl<Logger>(),
-    ),
-  );
+  sl.registerLazySingleton<AuthSource>(() => AuthSource(logger: sl<Logger>()));
 }
 
 Future<void> repositories() async {
@@ -79,8 +71,18 @@ Future<void> repositories() async {
 }
 
 Future<void> useCases() async {
-  sl.registerLazySingleton(() => RegisterUsecase(authRepository: sl<AuthRepository>()));
-  sl.registerLazySingleton(() => AuthenticateUsecase(authRepository: sl<AuthRepository>()));
+  sl.registerLazySingleton(
+    () => RegisterUsecase(authRepository: sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => AuthenticateUsecase(authRepository: sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => SendEmailUsecase(authRepository: sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => SendOTPUsecase(authRepository: sl<AuthRepository>()),
+  );
 }
 
 Future<void> blocs() async {

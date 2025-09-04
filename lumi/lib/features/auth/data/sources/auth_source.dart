@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 import 'package:logger/web.dart';
@@ -11,44 +10,38 @@ class AuthSource {
 
   AuthSource({required this.logger});
 
-  Future<DataState<Map<String, dynamic>>> authenticateWithEmail(String email, String password) async {
+  Future<DataState<Map<String, dynamic>>> authenticateWithEmail(
+    String email,
+    String password,
+  ) async {
     logger.i("Authenticating with email: $email");
 
     try {
-      final reqBody = jsonEncode({
-        'email': email,
-        'password': password,
-      });
+      final reqBody = jsonEncode({'email': email, 'password': password});
 
       final resp = await http.post(
         Uri.parse(ApiEndpoints.login),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: reqBody,
       );
 
-      log('Response status: ${resp.statusCode}');
-      log('Response body: ${resp.body}');
-
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
-        return Future.value(DataSuccess(data, 'Authentication successful'));
+        return DataSuccess(data, 'Authentication successful');
       } else {
-        return Future.value(DataFailure('Authentication failed', resp.statusCode));
+        return DataFailure('Authentication failed', resp.statusCode);
       }
     } catch (e) {
       logger.e("Error during email authentication: $e");
-      return Future.value(
-        DataSuccess({
-          'email': email,
-          'codeSent': true,
-        }, 'Authentication code sent to $email'),
-      );
+      return DataFailure("Authentication Failure", -1);
     }
   }
 
-  Future<DataState<Map<String, dynamic>>> registerWithEmail(String email, String fullName, String password) async {
+  Future<DataState<Map<String, dynamic>>> registerWithEmail(
+    String email,
+    String fullName,
+    String password,
+  ) async {
     logger.i("Registering with email: $email");
 
     try {
@@ -58,63 +51,74 @@ class AuthSource {
         'password': password,
       });
 
-      log("Request body: $reqBody");
       final resp = await http.post(
         Uri.parse(ApiEndpoints.register),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: reqBody,
       );
-
-      log('Response status: ${resp.statusCode}');
-      log('Response body: ${resp.body}');
 
       if (resp.statusCode == 201) {
         final data = jsonDecode(resp.body);
-        return Future.value(DataSuccess(data, 'Registration successful'));
+        return DataSuccess(data, 'Registration successful');
       } else {
-        return Future.value(DataFailure('Registration failed', resp.statusCode));
+        return DataFailure('Registration failed', resp.statusCode);
       }
     } catch (e) {
       logger.e("Error during email registration: $e");
-      return Future.value(
-        DataSuccess({
-          'email': email,
-          'codeSent': true,
-        }, 'Registration code sent to $email'),
-      );
+      return DataFailure("Registration failure", -1);
     }
   }
 
-  Future<DataState<Map<String, dynamic>>> sendEmail(String email) async {
+  Future<DataState<Map<String, dynamic>>> sendEmailForVerification(
+    String email,
+  ) async {
     logger.i("Sending email to: $email");
 
     try {
-      final reqBody = jsonEncode({
-        'email': email,
-      });
+      final reqBody = jsonEncode({'email': email});
 
       final resp = await http.post(
         Uri.parse(ApiEndpoints.sendEmail),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: reqBody,
       );
 
-      log('Response status: ${resp.statusCode}');
-      log('Response body: ${resp.body}');
-
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
-        return Future.value(DataSuccess(data, 'Email sent successfully'));
+        return DataSuccess(data, 'Email sent successfully');
       } else {
-        return Future.value(DataFailure('Failed to send email', resp.statusCode));
+        return DataFailure('Failed to send email', resp.statusCode);
       }
     } catch (e) {
       logger.e("Error during sending email: $e");
-      return Future.value(DataFailure('Error sending email', 500));
+      return DataFailure('Error sending email', -1);
+    }
+  }
+
+  Future<DataState<Map<String, dynamic>>> sendCodeForVerification(
+    String email,
+    String code,
+  ) async {
+    logger.i("Sending otp with: $email");
+
+    try {
+      final reqBody = jsonEncode({'email': email, 'code': code});
+
+      final resp = await http.post(
+        Uri.parse(ApiEndpoints.verifyOTP),
+        headers: {'Content-Type': 'application/json'},
+        body: reqBody,
+      );
+
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        return DataSuccess(data, 'OTP verified successfully');
+      } else {
+        return DataFailure('Failed to verify otp', resp.statusCode);
+      }
+    } catch (e) {
+      logger.e("Error during sending email: $e");
+      return DataFailure('Error sending email', -1);
     }
   }
 }
