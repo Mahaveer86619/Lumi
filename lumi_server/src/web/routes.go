@@ -17,6 +17,8 @@ func SetupRoutes() *mux.Router {
 	router.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
 	router.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
 	router.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
+	router.HandleFunc("/verify-email", handlers.SendVerificationEmailHandler).Methods("POST")
+	router.HandleFunc("/verify-otp", handlers.VerifyOTPFromEmailHandler).Methods("POST")
 	router.HandleFunc("/refresh", handlers.RefreshTokenHandler).Methods("POST")
 
 	// Protected routes

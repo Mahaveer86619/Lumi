@@ -3,9 +3,7 @@ package services
 import (
 	"errors"
 	"net/http"
-	"net/smtp"
 
-	"github.com/Mahaveer86619/Lumi/src/config"
 	"github.com/Mahaveer86619/Lumi/src/middleware"
 	"github.com/Mahaveer86619/Lumi/src/types"
 	"github.com/Mahaveer86619/Lumi/src/utils"
@@ -44,6 +42,7 @@ func RegisterUser(req types.RegisterRequest) (types.UserResponse, int, error) {
 		ID:           user.ID,
 		FullName:     user.FullName,
 		Email:        user.Email,
+		IsVerified:   user.IsVerified,
 		Token:        token,
 		RefreshToken: refreshToken,
 	}
@@ -95,16 +94,10 @@ func RefreshToken(req types.TokenRefreshRequest) (types.Tokens, int, error) {
 	return tokens, http.StatusOK, nil
 }
 
-func SendVerificationEmail(req types.EmailRequest) (int, error) {
-	from := config.GMAIL
-	password := config.GMAIL_APP_PASS
-	host := config.SMTP_HOST
-	port := config.SMTP_PORT
-
+func SendVerificationEmail(req types.EmailVerificationRequest) (int, error) {
 	to := req.Email
-	secret := []byte(config.FP_SECRET)
 
-	otp, err := GenerateOTP(secret, to)
+	otp, err := GenerateOTP(to)
 	if err != nil {
 		utils.AppLogger.Error("Failed to generate otp: %v", err)
 		return http.StatusInternalServerError, ErrInternalServerError
@@ -113,24 +106,29 @@ func SendVerificationEmail(req types.EmailRequest) (int, error) {
 	subject := "Email Verification"
 	body := utils.GenerateHTMLBody(otp)
 
-	msg := []byte("From: " + from + "\r\n" +
-		"To: " + to + "\r\n" +
-		"Subject: " + subject + "\r\n" +
-		"MIME-Version: 1.0\r\n" +
-		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
-		"\r\n" +
-		body)
-
-	auth := smtp.PlainAuth("", from, password, host)
-
-	err = smtp.SendMail(host+":"+port, auth, from, []string{to}, msg)
+	msg, err := SendHTMLEmail(to, subject, body)
 	if err != nil {
-		utils.AppLogger.Error("Failed to send email to %s: %v", to, err)
-		return http.StatusInternalServerError, ErrInternalServerError 
+		return http.StatusInternalServerError, err
+	} else {
+		utils.AppLogger.Info("Email sent successfully: %s", msg)
 	}
+
 	return http.StatusOK, nil
 }
 
-func verifyOTPFromEmail(req type.) {
+func VerifyOTPFromEmail(req types.VerifyEmailOTPRequest) (int, error) {
+	err := VerifyOTP(req.Email, req.OTP)
+	if err != nil {
+		utils.AppLogger.Error("Failed to verify OTP: %v", err)
+		return http.StatusUnauthorized, ErrInvalidCredentials
+	}
 
+	msg, err := VerifyUser(req.Email)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	utils.AppLogger.Info("User verified successfully: %s", msg)
+
+	return http.StatusOK, nil
 }

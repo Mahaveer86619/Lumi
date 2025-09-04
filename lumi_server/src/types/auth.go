@@ -13,6 +13,11 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-type EmailRequest struct {
+type EmailVerificationRequest struct {
 	Email  string `json:"email"`
+}
+
+type VerifyEmailOTPRequest struct {
+	Email string `json:"email"`
+	OTP   string `json:"otp"`
 }

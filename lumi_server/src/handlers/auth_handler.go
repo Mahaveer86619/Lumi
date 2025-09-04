@@ -31,6 +31,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	success := types.Success{}
 	success.SetStatusCode(status)
 	success.SetData(user)
+	success.SetMessage("Registration successfull")
 	success.JSON(w)
 }
 
@@ -58,6 +59,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	success := types.Success{}
 	success.SetStatusCode(status)
 	success.SetData(user)
+	success.SetMessage("Authentication successfull")
 	success.JSON(w)
 }
 
@@ -89,7 +91,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendVerificationEmailHandler(w http.ResponseWriter, r *http.Request) {
-	var req types.EmailRequest
+	var req types.EmailVerificationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		failure := types.Failure{}
 		failure.SetStatusCode(http.StatusBadRequest)
@@ -111,5 +113,31 @@ func SendVerificationEmailHandler(w http.ResponseWriter, r *http.Request) {
 	success := types.Success{}
 	success.SetStatusCode(status)
 	success.SetMessage("Email sent successfully")
+	success.JSON(w)
+}
+
+func VerifyOTPFromEmailHandler(w http.ResponseWriter, r *http.Request) {
+	var req types.VerifyEmailOTPRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		failure := types.Failure{}
+		failure.SetStatusCode(http.StatusBadRequest)
+		failure.SetMessage(err.Error())
+		failure.JSON(w)
+		return
+	}
+
+	// Handle OTP verification
+	status, err := services.VerifyOTPFromEmail(req)
+	if err != nil {
+		failure := types.Failure{}
+		failure.SetStatusCode(status)
+		failure.SetMessage(err.Error())
+		failure.JSON(w)
+		return
+	}
+
+	success := types.Success{}
+	success.SetStatusCode(status)
+	success.SetMessage("OTP verified successfully")
 	success.JSON(w)
 }

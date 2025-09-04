@@ -63,7 +63,7 @@ func UpdateUser(user types.UpdateUserRequest) (types.UserSafeResponse, string, e
 	var existingUser types.User
 	if err := database.DB.Where("id = ?", user.ID).First(&existingUser).Error; err != nil {
 		utils.AppLogger.Error("Error retrieving user by ID: %v", err.Error())
-		return types.UserSafeResponse{}, "", err
+		return types.UserSafeResponse{}, "user not found", err
 	}
 
 	existingUser.FullName = user.FullName
@@ -81,6 +81,21 @@ func UpdateUser(user types.UpdateUserRequest) (types.UserSafeResponse, string, e
 	}
 
 	return updatedUser, "User updated successfully", nil
+}
+
+func VerifyUser(email string) (string, error) {
+	user, msg, err := GetUserByEmail(email)
+	if err != nil {
+		return msg, err
+	}
+
+	user.IsVerified = true
+	if err := database.DB.Save(&user).Error; err != nil {
+		utils.AppLogger.Error("Error verifying user: %v", err.Error())
+		return "", err
+	}
+
+	return "User verified successfully", nil
 }
 
 func DeleteUser(id string) (string, error) {
